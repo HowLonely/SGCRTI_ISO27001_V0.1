@@ -19,10 +19,11 @@ import {
   IconCirclePlus,
   IconSubtask,
 } from "@tabler/icons-react";
-import { useState } from "react";
-import { RiskTable } from "../../components/Tables/RiskTable";
+import { useState, useEffect } from "react";
+import { TableCustom } from "../../components/Tables/TableCustom";
 
 import { useForm } from "@mantine/form";
+import { useFetch } from "../../hooks/useFetch"
 
 export const Riesgos = () => {
   const impactData = [
@@ -39,6 +40,44 @@ export const Riesgos = () => {
   const [active, setActive] = useState(0);
 
   const [checked, setChecked] = useState(false);
+
+  // Fetchear datos PROBLEMAS AL RENDERIZA
+  const data = useFetch("http://localhost:8000/api/controls/")
+  
+
+  console.log(data.data[0]);
+
+
+  // Datos de las tablas
+
+  // Las KEY deben ser los nombres de la tabla en el backend (Se podría hacer un mockup)
+  const risk_columns = [
+    { key: 'codigo', title: 'Código' },
+    { key: 'nombre', title: 'Nombre' },
+    { key: 'probabilidad', title: 'Probabilidad' },
+    { key: 'riesgo', title: 'Riesgo' }
+  ];
+
+  const controls_columns = [
+    { key: 'id', title: 'Código' },
+    { key: 'name', title: 'Nombre' },
+    { key: 'efficiency', title: 'Eficacia' },
+  ];
+
+  const process_columns = [
+    { key: 'id', title: 'Código' },
+    {  }
+  ]
+
+  const risk_data = [
+    { id: 1, codigo: '001', nombre: 'Riesgo 1', probabilidad: 'Alta', riesgo: 'Bajo' },
+    { id: 2, codigo: '002', nombre: 'Riesgo 2', probabilidad: 'Baja', riesgo: 'Medio' },
+    { id: 3, codigo: '003', nombre: 'Riesgo 3', probabilidad: 'Media', riesgo: 'Alto' }
+  ];
+
+  const controls_data = data.data;
+  
+
 
   const form = useForm({
     initialValues: {
@@ -149,39 +188,17 @@ export const Riesgos = () => {
                       label="Impacto"
                       description="Evalue el impacto que tendrá el riesgo"
                       placeholder="% Impacto total (Promedio)"
-                      onClick={toggle}
+                      data={
+                        [
+                          "Insignificante 20%",
+                          "Menor 40%",
+                          "Moderado 60%",
+                          "Mayor 80%",
+                          "Catastrófico 100%",
+                        ]
+                      }
+                      {...form.getInputProps("impacto")}
                     />
-                    
-                    <Collapse in={openedImpact}>
-                      {/* PARAMETRIZAR ESTOS DATOS (IMPACTOS Y DATA)*/}
-                      <Fieldset legend="Parámetros de impacto">
-                        <Select
-                          label="Operacional"
-                          placeholder="Seleccionar"
-                          data={impactData}
-                        />
-                        <Select
-                          label="Reputacional"
-                          placeholder="Seleccionar"
-                          data={impactData}
-                        />
-                        <Select
-                          label="Legal"
-                          placeholder="Seleccionar"
-                          data={impactData}
-                        />
-                        <Select
-                          label="Financiero"
-                          placeholder="Seleccionar"
-                          data={impactData}
-                        />
-                        <Select
-                          label="Ambiental"
-                          placeholder="Seleccionar"
-                          data={impactData}
-                        />
-                      </Fieldset>
-                    </Collapse>
                   </Stack>
                 </Group>
                 <Textarea
@@ -241,7 +258,7 @@ export const Riesgos = () => {
                   </Tabs.Panel>
 
                   <Tabs.Panel value="controles" p={"sm"}>
-                    Settings tab
+                    <TableCustom data={controls_data} columns={controls_columns} />
                   </Tabs.Panel>
                 </Tabs>
               </Group>
@@ -273,7 +290,8 @@ export const Riesgos = () => {
           Agregar riesgo
         </Button>
       </Group>
-      <RiskTable />
+      
+      <TableCustom data={risk_data} columns={risk_columns}/>
     </Stack>
   );
 };
