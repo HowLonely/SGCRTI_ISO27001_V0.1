@@ -4,6 +4,10 @@ import { Dashboard } from "./Dashboard";
 import { AppShell, Burger, Group } from "@mantine/core";
 import { Procesos } from "./Procesos";
 import { Riesgos } from "./Riesgos";
+import { Controles } from "./Controles";
+import { Activos } from "./Activos";
+import { Eventos } from "./Eventos";
+import {Planes} from "./Planes";
 import { useDisclosure } from "@mantine/hooks";
 import { ActionToggle } from "../../components/DarkMode/ActionToggle";
 
@@ -64,6 +68,10 @@ export const Home = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/procesos" element={<Procesos />} />
             <Route path="/riesgos" element={<Riesgos />} />
+            <Route path="/controles" element={<Controles/>} />
+            <Route path="/activos" element={<Activos/>} />
+            <Route path="/eventos" element={<Eventos/>} />
+            <Route path="/planes" element={<Planes/>} />
           </Route>
         </Routes>
       </AppShell.Main>
