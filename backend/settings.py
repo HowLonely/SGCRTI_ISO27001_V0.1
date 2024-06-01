@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     # local app
     "users",
+    "api",
 ]
 
 
