@@ -25,11 +25,11 @@ const data = [
   { link: "dashboard", label: "Dashboard", icon: IconDashboard },
   { link: "procesos", label: "Procesos", icon: IconSubtask },
   { link: "riesgos", label: "Riesgos", icon: IconAlertTriangle },
-  { link: "", label: "Controles", icon: IconAdjustmentsAlt },
-  { link: "", label: "Activos de información", icon: IconAlertOctagon },
+  { link: "controles", label: "Controles", icon: IconAdjustmentsAlt },
+  { link: "activos", label: "Activos de información", icon: IconAlertOctagon },
   /*{ link: "", label: "Causas y consecuencias", icon: IconLicense },*/
-  { link: "", label: "Eventos", icon: IconCalendarEvent },
-  { link: "", label: "Planes de acción", icon: IconCalendarCheck },
+  { link: "eventos", label: "Eventos", icon: IconCalendarEvent },
+  { link: "planes", label: "Planes de acción", icon: IconCalendarCheck },
   /*{ link: "", label: "Reportes", icon: IconReportAnalytics },
   { link: "", label: "Indicadores", icon: IconTimeline },
   { link: "", label: "Evaluaciones", icon: IconNotes },*/
