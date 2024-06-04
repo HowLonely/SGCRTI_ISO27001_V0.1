@@ -12,10 +12,25 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
+import { useFetch } from "../../hooks/useFetch";
+
+import { TableCustom } from "../../components/Tables/TableCustom";
 
 export const Controles = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [active, setActive] = useState(0);
+
+  const fetchControl = useFetch("http://localhost:8000/api/controls/")
+
+  // Columnas de las tablas
+  //MAIN
+  const controls_columns = [
+    { key: 'id', title: 'Código' },
+    { key: 'name', title: 'Nombre' },
+    { key: 'efficiency', title: 'Eficacia' },
+  ];
+
+  const control_data = fetchControl.data;
 
   const nextStep = () =>
     setActive((current) => (current < 3 ? current + 1 : current));
@@ -24,7 +39,7 @@ export const Controles = () => {
 
   return (
     <Stack>
-      <Flex justify={"flex-start"}>
+      <Group justify={"flex-start"}>
         {/* BODY */}
         <Modal
           opened={opened}
@@ -171,7 +186,10 @@ export const Controles = () => {
         <Button onClick={open} variant="outline" size="md" radius={"md"}>
           Agregar Control
         </Button>
-      </Flex>
+      </Group>
+
+      {!fetchControl.isLoading && <TableCustom data={control_data} columns={controls_columns}/>}
+
     </Stack>
   );
 };
