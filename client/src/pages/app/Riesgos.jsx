@@ -21,20 +21,13 @@ import {
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import { TableCustom } from "../../components/Tables/TableCustom";
+import { TableAsociation } from "../../components/Tables/TableAsociation";
 
 import { useForm } from "@mantine/form";
 import { useFetch } from "../../hooks/useFetch"
 
 export const Riesgos = () => {
-  const impactData = [
-    "Insignificante 20%",
-    "Menor 40%",
-    "Moderado 60%",
-    "Mayor 80%",
-    "Catastrófico 100%",
-  ];
 
-  const [openedImpact, { toggle }] = useDisclosure(false);
   const [openedModal, { open, close }] = useDisclosure(false);
 
   const [active, setActive] = useState(0);
@@ -42,20 +35,19 @@ export const Riesgos = () => {
   const [checked, setChecked] = useState(false);
 
   // Fetchear datos PROBLEMAS AL RENDERIZA
-  const data = useFetch("http://localhost:8000/api/controls/")
-  
-
-  console.log(data.data[0]);
+  const fetchControl = useFetch("http://localhost:8000/api/controls/")
+  const fetchProcess = useFetch("http://localhost:8000/api/processes/")
+  const fetchRisk = useFetch("http://localhost:8000/api/risks/")
 
 
   // Datos de las tablas
-
-  // Las KEY deben ser los nombres de la tabla en el backend (Se podría hacer un mockup)
+  // Las KEY deben ser los nombres de las columnas de las tablas en el backend (Se podría hacer un mockup)
   const risk_columns = [
-    { key: 'codigo', title: 'Código' },
-    { key: 'nombre', title: 'Nombre' },
-    { key: 'probabilidad', title: 'Probabilidad' },
-    { key: 'riesgo', title: 'Riesgo' }
+    { key: 'id', title: 'Código' },
+    { key: 'name', title: 'Nombre' },
+    { key: 'probability', title: 'Probabilidad' },
+    { key: 'impact', title: 'Impacto' },
+    
   ];
 
   const controls_columns = [
@@ -66,39 +58,40 @@ export const Riesgos = () => {
 
   const process_columns = [
     { key: 'id', title: 'Código' },
-    {  }
+    { key: 'name', title: 'Nombre' },
   ]
 
-  const risk_data = [
-    { id: 1, codigo: '001', nombre: 'Riesgo 1', probabilidad: 'Alta', riesgo: 'Bajo' },
-    { id: 2, codigo: '002', nombre: 'Riesgo 2', probabilidad: 'Baja', riesgo: 'Medio' },
-    { id: 3, codigo: '003', nombre: 'Riesgo 3', probabilidad: 'Media', riesgo: 'Alto' }
-  ];
 
-  const controls_data = data.data;
-  
+  const controls_data = fetchControl.data;
+  const processes_data = fetchProcess.data;
+  const risks_data = fetchRisk.data;
+
 
 
   const form = useForm({
     initialValues: {
-      nombre_riesgo: "",
-      probabilidad: "",
-      impacto: "",
-      descripcion: "",
-      afecta_funcionamiento: "",
+      name: "",
+      probability: "",
+      details: "",
+      impact: "",
+      //Falta afecta funcionamiento (en backend y front)
     },
 
     validate: (values) => {
       // Validaciones de cada step
       if (active === 0) {
         return {
-          nombre_riesgo: values.nombre_riesgo
+          name: values.name
             ? null
             : "Ingrese un nombre del riesgo",
-          probabilidad:
-            values.probabilidad
+          probability:
+            values.probability
               ? null
               : "Ingrese una probabilidad de ocurrencia",
+          impact:
+            values.impact
+              ? null
+              : "Ingrese el impacto del riesgo"
         };
       }
 
@@ -157,7 +150,7 @@ export const Riesgos = () => {
                   placeholder="Riesgo 1"
                   description="Ingrese un nombre para el riesgo"
                   inputWrapperOrder={["label", "description", "input", "error"]}
-                  {...form.getInputProps("nombre_riesgo")}
+                  {...form.getInputProps("name")}
                 />
                 <Group grow>
                   <Select
@@ -177,7 +170,7 @@ export const Riesgos = () => {
                       ]
                       /* Estas opciones luego deberán ser parametrizables */
                     }
-                    {...form.getInputProps("probabilidad")}
+                    {...form.getInputProps("probability")}
                   />
 
                   <Stack>
@@ -197,7 +190,7 @@ export const Riesgos = () => {
                           "Catastrófico 100%",
                         ]
                       }
-                      {...form.getInputProps("impacto")}
+                      {...form.getInputProps("impact")}
                     />
                   </Stack>
                 </Group>
@@ -208,6 +201,7 @@ export const Riesgos = () => {
                   placeholder="Breve descripción"
                   description="Ingrese una breve descripción del riesgo"
                   inputWrapperOrder={["label", "description", "input", "error"]}
+                  {...form.getInputProps("details")}
                 />
                 <Switch
                   checked={checked}
@@ -254,11 +248,12 @@ export const Riesgos = () => {
                           Nuevo proceso
                         </Button>
                       </Group>
+                      {!fetchProcess.isLoading && <TableAsociation data={processes_data} columns={process_columns} />}
                     </Stack>
                   </Tabs.Panel>
 
                   <Tabs.Panel value="controles" p={"sm"}>
-                    <TableCustom data={controls_data} columns={controls_columns} />
+                    {!fetchControl.isLoading && <TableAsociation data={controls_data} columns={controls_columns} />}
                   </Tabs.Panel>
                 </Tabs>
               </Group>
@@ -291,7 +286,7 @@ export const Riesgos = () => {
         </Button>
       </Group>
       
-      <TableCustom data={risk_data} columns={risk_columns}/>
+      {!fetchRisk.isLoading && <TableCustom data={risks_data} columns={risk_columns}/>}
     </Stack>
   );
 };

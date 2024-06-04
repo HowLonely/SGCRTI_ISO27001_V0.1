@@ -47,7 +47,7 @@ export function RegisterForm(props: PaperProps) {
     validate: {
       email: (val) => (/^\S+@\S+$/.test(val) ? null : "Correo inválido"),
       password1: (val) =>
-        val.length <= 9
+        val.length <= 8
           ? "La contraseña debe tener como mínimo 8 caracteres"
           : null,
       terms: (val) => (!val ? "Debe aceptar los términos y condiciones" : null),

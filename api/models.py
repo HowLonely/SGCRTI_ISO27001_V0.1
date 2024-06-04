@@ -24,7 +24,6 @@ class Risk(models.Model):
     
 class Process(models.Model):
     name = models.CharField(max_length=100)
-    efficiency = models.DecimalField(max_digits=5, decimal_places=2)
     details = models.TextField(blank=True, null=True)
     events = models.ManyToManyField(Event, blank=True, null=True)
     risks = models.ManyToManyField(Risk, blank=True, null=True)
@@ -45,7 +44,7 @@ class Control(models.Model):
     name = models.CharField(max_length=100)
     efficiency = models.DecimalField(max_digits=5, decimal_places=2)
     details = models.TextField(blank=True, null=True)
-    risks = models.ManyToManyField(Risk)
+    risks = models.ManyToManyField(Risk, blank=True, null=True)
 
     def __str__(self):
         return self.name
