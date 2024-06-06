@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export const useFetch = (url) => {
+export const useFetch = (url, method = 'GET', body = null) => {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -9,14 +9,24 @@ export const useFetch = (url) => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(url);
+        const options = {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json', // Puedes ajustar los encabezados según tus necesidades
+          },
+          body: body ? JSON.stringify(body) : null,
+        };
+
+        const response = await fetch(url, options);
+        const responseData = await response.json();
+
         if (!response.ok) {
-          throw new Error('Network response was not ok.');
+          throw new Error(responseData.message || 'Something went wrong');
         }
-        const result = await response.json();
-        setData(result);
+
+        setData(responseData);
       } catch (error) {
-        setError(error);
+        setError(error.message);
       } finally {
         setIsLoading(false);
       }
@@ -24,7 +34,7 @@ export const useFetch = (url) => {
 
     fetchData();
 
-  }, [url]);
+  }, [url, method, body]);
 
   return { data, isLoading, error };
 };

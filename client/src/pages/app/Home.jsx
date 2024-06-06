@@ -23,7 +23,6 @@ export const Home = () => {
 
   const userSelector = useSelector((state) => state.AuthReducer.user);
 
-  console.log(userSelector);
 
   const dispatch = useDispatch();
 

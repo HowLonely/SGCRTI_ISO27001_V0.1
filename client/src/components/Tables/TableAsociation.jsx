@@ -2,8 +2,21 @@
 import { Table, Checkbox } from "@mantine/core";
 import { useState } from "react";
 
-export const TableAsociation = ({ data, columns }) => {
-  const [selectedRows, setSelectedRows] = useState([]);
+export const TableAsociation = ({
+  data,
+  columns,
+  selectedIds,
+  setSelectedIds,
+}) => {
+  const [selectedRows] = useState([]);
+
+  const handleCheckBoxChange = (id) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter((selectedId) => selectedId !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
+    }
+  };
 
   const rows = data.map((item) => (
     <Table.Tr
@@ -17,16 +30,8 @@ export const TableAsociation = ({ data, columns }) => {
       <Table.Td>
         <Checkbox
           aria-label="Select row"
-          checked={selectedRows.includes(item.id)}
-          onChange={(event) =>
-            setSelectedRows(
-              event.currentTarget.checked
-                ? [...selectedRows, item.id]
-                : selectedRows.filter(
-                    (id) => id !== item.id
-                  )
-            )
-          }
+          checked={selectedIds.includes(item.id)}
+          onChange={() => handleCheckBoxChange(item.id)}
         />
       </Table.Td>
 
@@ -37,7 +42,7 @@ export const TableAsociation = ({ data, columns }) => {
   ));
 
   return (
-    <Table.ScrollContainer>
+    <Table.ScrollContainer h={250}>
       <Table>
         <Table.Thead>
           <Table.Tr>

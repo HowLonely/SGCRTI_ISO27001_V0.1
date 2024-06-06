@@ -9,31 +9,79 @@ import {
   Textarea,
   Select,
   Checkbox,
+  Tabs,
+  Title,
 } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
 import { useFetch } from "../../hooks/useFetch";
 
 import { TableCustom } from "../../components/Tables/TableCustom";
+import {
+  IconAdjustmentsAlt,
+  IconCirclePlus,
+  IconSubtask,
+} from "@tabler/icons-react";
+import { TableAsociation } from "../../components/Tables/TableAsociation";
 
 export const Controles = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [active, setActive] = useState(0);
 
-  const fetchControl = useFetch("http://localhost:8000/api/controls/")
+  const fetchControl = useFetch("http://localhost:8000/api/controls/");
+  const fetchRisk = useFetch("http://localhost:8000/api/risks/")
 
   // Columnas de las tablas
   //MAIN
-  const controls_columns = [
-    { key: 'id', title: 'Código' },
-    { key: 'name', title: 'Nombre' },
-    { key: 'efficiency', title: 'Eficacia' },
+  const control_columns = [
+    { key: "id", title: "Código" },
+    { key: "name", title: "Nombre" },
+    { key: "efficiency", title: "Eficacia" },
+  ];
+
+  const risk_columns = [
+    { key: "id", title: "Código" },
+    { key: "name", title: "Nombre" },
+    { key: "probability", title: "Probabilidad" },
+    { key: "impact", title: "Impacto" },
   ];
 
   const control_data = fetchControl.data;
+  const risk_data = fetchRisk.data;
+
+  const form = useForm({
+    initialValues: {
+      name: "",
+      efficiency: "",
+      details: "",
+      risk: "", // id del riesgo asociado
+      //Falta afecta funcionamiento (en backend y front)
+    },
+
+    validate: (values) => {
+      // Validaciones de cada step
+      if (active === 0) {
+        return {
+          name: values.name ? null : "Ingrese un nombre del control",
+          efficiency: values.efficiency
+            ? null
+            : "Ingrese una calificación al control",
+        };
+      }
+
+      return {};
+    },
+  });
 
   const nextStep = () =>
-    setActive((current) => (current < 3 ? current + 1 : current));
+    setActive((current) => {
+      if (form.validate().hasErrors) {
+        return current;
+      }
+      return current < 3 ? current + 1 : current;
+    });
+
   const prevStep = () =>
     setActive((current) => (current > 0 ? current - 1 : current));
 
@@ -49,7 +97,11 @@ export const Controles = () => {
           centered
         >
           {/* Modal content */}
-          <Stepper active={active} onStepClick={setActive}>
+          <Stepper
+            active={active}
+            onStepClick={setActive}
+            allowNextStepsSelect={false}
+          >
             <Stepper.Step
               label="Crear Control"
               description="Información general"
@@ -63,16 +115,9 @@ export const Controles = () => {
                   placeholder="Control 1"
                   description="Ingrese un nombre para el control"
                   inputWrapperOrder={["label", "description", "input", "error"]}
+                  {...form.getInputProps("name")}
                 />
-                <Textarea
-                  required
-                  radius="md"
-                  size="md"
-                  label="Descripción del Control"
-                  placeholder="Breve descripción"
-                  description="Ingrese una breve descripción del control"
-                  inputWrapperOrder={["label", "description", "input", "error"]}
-                />
+
                 <Select
                   required
                   radius="md"
@@ -81,13 +126,24 @@ export const Controles = () => {
                   placeholder="Seleccione una calificación"
                   description="Califique la efectividad del control"
                   data={[
-                    { value: '1', label: 'Deficiente' },
-                    { value: '2', label: 'Mediocre' },
-                    { value: '3', label: 'Adecuado' },
-                    { value: '4', label: 'Bueno' },
-                    { value: '5', label: 'Excelente' },
+                    { value: "1", label: "Deficiente" },
+                    { value: "2", label: "Mediocre" },
+                    { value: "3", label: "Adecuado" },
+                    { value: "4", label: "Bueno" },
+                    { value: "5", label: "Excelente" },
                   ]}
                   inputWrapperOrder={["label", "description", "input", "error"]}
+                  {...form.getInputProps("efficiency")}
+                />
+
+                <Textarea
+                  radius="md"
+                  size="md"
+                  label="Descripción del Control"
+                  placeholder="Breve descripción"
+                  description="Ingrese una breve descripción del control"
+                  inputWrapperOrder={["label", "description", "input", "error"]}
+                  {...form.getInputProps("details")}
                 />
               </Stack>
             </Stepper.Step>
@@ -96,40 +152,42 @@ export const Controles = () => {
               label="Realizar asociaciones"
               description="Asociar riesgos, activos, procesos, etc."
             >
-              <Stack>
-                <TextInput
-                  radius="md"
-                  size="md"
-                  label="Asociación a Riesgos"
-                  placeholder="Nombre del Riesgo"
-                  description="Ingrese el nombre del riesgo al que está asociado el control"
-                  inputWrapperOrder={["label", "description", "input", "error"]}
-                />
-                <TextInput
-                  radius="md"
-                  size="md"
-                  label="Asociación a Activos"
-                  placeholder="Nombre del Activo"
-                  description="Ingrese el nombre del activo al que está asociado el control"
-                  inputWrapperOrder={["label", "description", "input", "error"]}
-                />
-                <TextInput
-                  radius="md"
-                  size="md"
-                  label="Asociación a Procesos"
-                  placeholder="Nombre del Proceso"
-                  description="Ingrese el nombre del proceso al que está asociado el control"
-                  inputWrapperOrder={["label", "description", "input", "error"]}
-                />
-                <TextInput
-                  radius="md"
-                  size="md"
-                  label="Asociación a Eventos/Incidentes"
-                  placeholder="Nombre del Evento/Incidente"
-                  description="Ingrese el nombre del evento/incidente al que está asociado el control"
-                  inputWrapperOrder={["label", "description", "input", "error"]}
-                />
-              </Stack>
+              <Group grow>
+                <Tabs
+                  variant="outline"
+                  orientation="horizontal"
+                  defaultValue="risks"
+                  radius={"lg"}
+                >
+                  <Tabs.List>
+                    <Tabs.Tab value="risks" leftSection={<IconSubtask />}>
+                      Riesgos
+                    </Tabs.Tab>
+                    
+                  </Tabs.List>
+
+                  <Tabs.Panel value="risks" p={"sm"}>
+                    <Stack>
+                      <Group justify="space-between">
+                        <Title order={5}>Riesgos asociados</Title>
+                        <Button
+                          variant="outline"
+                          leftSection={<IconCirclePlus size={22} />}
+                          size="sm"
+                        >
+                          Nuevo riesgo
+                        </Button>
+                      </Group>
+                      {!fetchRisk.isLoading && (
+                        <TableAsociation
+                          data={risk_data}
+                          columns={risk_columns}
+                        />
+                      )}
+                    </Stack>
+                  </Tabs.Panel>
+                </Tabs>
+              </Group>
             </Stepper.Step>
 
             <Stepper.Step
@@ -154,10 +212,10 @@ export const Controles = () => {
                   placeholder="Seleccione la frecuencia"
                   description="Seleccione la frecuencia con la que se revisará el control"
                   data={[
-                    { value: 'monthly', label: 'Mensual' },
-                    { value: 'quarterly', label: 'Trimestral' },
-                    { value: 'semiannually', label: 'Semestral' },
-                    { value: 'annually', label: 'Anual' },
+                    { value: "monthly", label: "Mensual" },
+                    { value: "quarterly", label: "Trimestral" },
+                    { value: "semiannually", label: "Semestral" },
+                    { value: "annually", label: "Anual" },
                   ]}
                   inputWrapperOrder={["label", "description", "input", "error"]}
                 />
@@ -171,7 +229,8 @@ export const Controles = () => {
             </Stepper.Step>
 
             <Stepper.Completed>
-              Completo, haga clic en el botón Volver para regresar al paso anterior.
+              Completo, haga clic en el botón Volver para regresar al paso
+              anterior.
             </Stepper.Completed>
           </Stepper>
 
@@ -188,8 +247,9 @@ export const Controles = () => {
         </Button>
       </Group>
 
-      {!fetchControl.isLoading && <TableCustom data={control_data} columns={controls_columns}/>}
-
+      {!fetchControl.isLoading && (
+        <TableCustom data={control_data} columns={control_columns} />
+      )}
     </Stack>
   );
 };
