@@ -50,7 +50,6 @@ export const Riesgos = () => {
       processes: selectedProcessIds,
     };
     console.log(requestData);
-    /*
     try {
       const response = await fetch("http://localhost:8000/api/risks/", {
         method: "POST",
@@ -62,9 +61,8 @@ export const Riesgos = () => {
       const resp = await response.json();
       console.log(resp);
     } catch (error) {
-      console.error("Error submitting form:", error);
-    }¨
-    */
+      console.error("Error backend:", error);
+    }
   };
 
   // Datos de las tablas
@@ -320,7 +318,7 @@ export const Riesgos = () => {
                     Registrar
                   </Button>
                 ) : (
-                  <Button onClick={nextStep}>Next step</Button>
+                  <Button onClick={nextStep}>Continuar</Button>
                 )}
               </Group>
 
