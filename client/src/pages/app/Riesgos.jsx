@@ -33,7 +33,7 @@ export const Riesgos = () => {
 
   const [checked, setChecked] = useState(false);
 
-  // IDS de las asociaciones
+  // IDS de las asociaciones seleccionadas
   const [selectedControlIds, setSelectedControlIds] = useState([]);
   const [selectedProcessIds, setSelectedProcessIds] = useState([]);
 
