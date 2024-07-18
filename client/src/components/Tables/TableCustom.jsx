@@ -4,6 +4,7 @@ import { IconEdit, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { RiskForm } from "../ModalForms/RiskForm";
 import { ControlForm } from "../ModalForms/ControlForm";
+import { ProcessForm } from "../ModalForms/ProcessForm";
 
 export const TableCustom = ({ data: initialData, columns, dataType}) => {
   const [selectedItem, setSelectedItem] = useState(null);
@@ -105,6 +106,14 @@ export const TableCustom = ({ data: initialData, columns, dataType}) => {
           )}
           {dataType === "control" && (
             <ControlForm
+              initialValues={selectedItem}
+              editMode={true}
+              updateData={updateData} // Pasar función de actualización
+              close={close} // Pasar función de cierre del modal
+            />
+          )}
+          {dataType === "process" && (
+            <ProcessForm
               initialValues={selectedItem}
               editMode={true}
               updateData={updateData} // Pasar función de actualización
