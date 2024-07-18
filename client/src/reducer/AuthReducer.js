@@ -3,8 +3,7 @@ import TYPE from "./Type";
 
 const initialState = {
   access_token: localStorage.getItem("access_token"),
-  isAuthenticated: false,
-  user: null,
+  user: localStorage.getItem("user"),
   message: "",
 };
 
@@ -13,6 +12,7 @@ const AuthReducer = (state = initialState, action) => {
   switch (type) {
     case TYPE.LOGIN_SUCCESS:
       localStorage.setItem("access_token", payload.access);
+      localStorage.setItem("user", payload.user)
       showNotification({
         title: "✅ HA INICIADO SESIÓN CORRECTAMENTE",
         message: "",

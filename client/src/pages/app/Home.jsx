@@ -23,6 +23,8 @@ export const Home = () => {
 
   const userSelector = useSelector((state) => state.AuthReducer.user);
 
+  console.log("usser desde home: " + userSelector.email);
+
 
   const dispatch = useDispatch();
 
@@ -55,7 +57,7 @@ export const Home = () => {
       </AppShell.Header>
 
       <AppShell.Navbar>
-        <Navbar user={userSelector} />
+        <Navbar user={(userSelector)} />
         {  /*console.log(userSelector)*/}
       </AppShell.Navbar>
 

@@ -2,6 +2,7 @@ import TYPE from "./Type";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
+
 export const closeAlert = () => (dispatch) => {
   dispatch({
     type: TYPE.CLOSE_ALERT,
