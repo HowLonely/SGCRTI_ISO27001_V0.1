@@ -2,9 +2,10 @@ import { Button, Group, Modal, Stack } from "@mantine/core";
 import { useFetch } from "../../hooks/useFetch";
 import { TableCustom } from "../../components/Tables/TableCustom";
 import { useDisclosure } from "@mantine/hooks";
-import { ControlForm } from "../../components/ModalForms/ControlForm";
+import { ControlForm } from "../../components/ModalForms/Controles/ControlForm";
+import { ModalProvider } from "../../components/ModalForms/ModalContext";
 
-export const Controles = () => {
+const Controles = () => {
   const [openedModal, { open, close }] = useDisclosure(false);
 
   const fetchControl = useFetch("http://localhost:8000/api/controls/");
@@ -16,6 +17,7 @@ export const Controles = () => {
     { key: "execution", title: "Forma que se ejecuta" },
     { key: "flexibility", title: "Flexibilidad" },
     { key: "efficacy", title: "Eficacia" },
+    { key: "status", title: "Estado" },
     { key: "actions", title: "" },
   ];
 
@@ -43,8 +45,20 @@ export const Controles = () => {
 
       {/* Mostrar la tabla de controles */}
       {!fetchControl.isLoading && (
-        <TableCustom data={controls_data} columns={control_columns} dataType={"control"}/>
+        <TableCustom
+          data={controls_data}
+          columns={control_columns}
+          dataType={"control"}
+        />
       )}
     </Stack>
   );
 };
+
+const WrappedControles = () => (
+  <ModalProvider>
+    <Controles />
+  </ModalProvider>
+);
+
+export default WrappedControles;

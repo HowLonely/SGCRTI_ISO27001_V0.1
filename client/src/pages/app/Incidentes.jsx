@@ -12,8 +12,9 @@ import {
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { useState } from "react";
+import { ModalProvider } from "../../components/ModalForms/ModalContext";
 
-export const Eventos = () => {
+const Incidentes = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [active, setActive] = useState(0);
 
@@ -29,41 +30,41 @@ export const Eventos = () => {
           h={300}
           opened={opened}
           onClose={close}
-          title="Registrar Evento/Incidente"
+          title="Registrar Incidente"
           size={"xl"}
           centered
         >
           <Stepper active={active} onStepClick={setActive}>
             <Stepper.Step
-              label="Registrar Evento/Incidente"
-              description="Detalles del evento/incidente"
+              label="Registrar Incidente"
+              description="Detalles del incidente"
             >
               <Stack>
                 <TextInput
                   required
                   radius="md"
                   size="md"
-                  label="Nombre del Evento/Incidente"
+                  label="Nombre del Incidente"
                   placeholder="Incidente 1"
-                  description="Ingrese un nombre para el evento/incidente"
+                  description="Ingrese un nombre para el incidente"
                   inputWrapperOrder={["label", "description", "input", "error"]}
                 />
                 <Textarea
                   required
                   radius="md"
                   size="md"
-                  label="Descripción del Evento/Incidente"
+                  label="Descripción del Incidente"
                   placeholder="Breve descripción"
-                  description="Ingrese una breve descripción del evento/incidente"
+                  description="Ingrese una breve descripción del incidente"
                   inputWrapperOrder={["label", "description", "input", "error"]}
                 />
                 <Select
                   required
                   radius="md"
                   size="md"
-                  label="Tipo de Evento/Incidente"
-                  placeholder="Seleccione el tipo de evento/incidente"
-                  description="Seleccione el tipo de evento/incidente"
+                  label="Tipo de Incidente"
+                  placeholder="Seleccione el tipo de incidente"
+                  description="Seleccione el tipo de incidente"
                   data={[
                     { value: "security-breach", label: "Brecha de seguridad" },
                     { value: "data-leak", label: "Fuga de datos" },
@@ -77,7 +78,7 @@ export const Eventos = () => {
                   required
                   radius="md"
                   size="md"
-                  label="Fecha del Evento/Incidente"
+                  label="Fecha del Incidente"
                   placeholder="YYYY-MM-DD"
                   description="Ingrese la fecha del evento/incidente"
                   inputWrapperOrder={["label", "description", "input", "error"]}
@@ -86,7 +87,7 @@ export const Eventos = () => {
             </Stepper.Step>
 
             <Stepper.Step
-              label="Asociar Evento/Incidente"
+              label="Asociar Incidente"
               description="Asociar a riesgos, activos, etc."
             >
               <Stack>
@@ -120,7 +121,7 @@ export const Eventos = () => {
                   size="md"
                   label="Método de Evaluación"
                   placeholder="Describa el método de evaluación"
-                  description="Ingrese cómo se evaluará la efectividad del evento/incidente"
+                  description="Ingrese cómo se evaluará la efectividad del incidente"
                   inputWrapperOrder={["label", "description", "input", "error"]}
                 />
                 <Select
@@ -162,9 +163,17 @@ export const Eventos = () => {
         </Modal>
 
         <Button onClick={open} variant="outline" size="md" radius={"md"}>
-          Registrar Evento
+          Registrar Incidente
         </Button>
       </Flex>
     </Stack>
   );
 };
+
+const WrappedIncidentes = () => (
+  <ModalProvider>
+    <Incidentes />
+  </ModalProvider>
+)
+
+export default WrappedIncidentes

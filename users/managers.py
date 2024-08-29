@@ -21,7 +21,7 @@ class CustomUserManager(BaseUserManager):
             clean_email = self.normalize_email(email)
         if not first_name:
             raise ValueError(_("This is required field"))
-        
+                
         user = self.model(
             email = clean_email,
             first_name = first_name,

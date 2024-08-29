@@ -1,5 +1,5 @@
 """
-URL configuration for backend project.
+URL configuration for core project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.0/topics/http/urls/
@@ -19,17 +19,16 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from users.views import reset_password_confirm, email_confirmation
+from dj_rest_auth.registration.views import ConfirmEmailView, RegisterView
+from users.serializers import CustomRegisterSerializer
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
     path('dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
-    path('dj-rest-auth/registration/account-confirm-email/<str:key>/', email_confirmation),
-    path('reset/password/confirm/<uid>/<token>', reset_password_confirm, name="password_reset_confirm"),
-
-
-
+    path('dj-rest-auth/registration/account-confirm-email/<str:key>/', ConfirmEmailView.as_view()),
+    path('dj-rest-auth/registration/', RegisterView.as_view(serializer_class=CustomRegisterSerializer)),
+    path('account/', include('allauth.urls')),    #path('reset/password/confirm/<uid>/<token>', reset_password_confirm, name="password_reset_confirm"),
     #path('users/', include('users.urls')),
     
     path('api/', include('api.urls')),

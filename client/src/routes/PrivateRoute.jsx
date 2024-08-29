@@ -1,13 +1,14 @@
 import { useSelector } from "react-redux";
 import { Outlet, Navigate } from "react-router-dom";
+import Cookies from 'js-cookie';
 
 const PrivateRoute = () => {
-    const access_token = localStorage.getItem("access_token");
-    const authSelector = useSelector(state => state.AuthReducer.isAuthenticated);
+  const accessToken = Cookies.get("access");
+  const isAuthenticated = useSelector(state => state.AuthReducer.isAuthenticated);
 
-    return (
-        authSelector && access_token ? <Outlet /> : <Navigate to="/auth/" replace={true} />
-    )
-}
+  return (
+    isAuthenticated && accessToken ? <Outlet /> : <Navigate to="/auth/" replace={true} />
+  );
+};
 
 export default PrivateRoute;

@@ -64,6 +64,7 @@ export const Procesos = () => {
   const process_columns = [
     { key: "id", title: "Código" },
     { key: "name", title: "Nombre" },
+    { key: "actions", title: "Acciones" }
   ];
 
   const event_columns = [

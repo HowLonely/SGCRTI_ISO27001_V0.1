@@ -1,43 +1,55 @@
-/* eslint-disable react/prop-types */
-import { Button, Group, Table } from "@mantine/core";
+import { Button, Group, Modal, Table, Badge } from "@mantine/core";
 import { IconEdit, IconTrash } from "@tabler/icons-react";
-import { useState } from "react";
-import { RiskForm } from "../ModalForms/RiskForm";
-import { ControlForm } from "../ModalForms/ControlForm";
-import { ProcessForm } from "../ModalForms/ProcessForm";
+import { useEffect, useState } from "react";
+import { RiskForm } from "../ModalForms/Riesgos/RiskForm";
+import { ControlForm } from "../ModalForms/Controles/ControlForm";
 
-export const TableCustom = ({ data: initialData, columns, dataType}) => {
+export const TableCustom = ({
+  data: initialData,
+  columns,
+  dataType,
+  openedModal,
+}) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [data, setData] = useState(initialData); // Estado para los datos
 
-  // Función para actualizar los datos después de realizar operaciones CRUD
-  const updateData = (newData) => {
-    setData(newData);
-  };
+  const [openedModalEdit, setOpenedModalEdit] = useState(false);
+
+  const openModal = () => setOpenedModalEdit(true);
+  const closeModal = () => setOpenedModalEdit(false);
+
+  useEffect(() => {
+    if (openedModal) {
+      openModal();
+    } else {
+      closeModal();
+    }
+  }, [openedModal]);
 
   const handleEdit = (record) => {
     setSelectedItem(record);
-    open(); // Abrir el modal al editar
+    openModal(); // Abrir el modal al editar
   };
 
   const handleDelete = async (id) => {
     console.log(`Eliminar ${dataType} con ID:`, id);
     try {
-      const response = await fetch(`http://localhost:8000/api/${dataType}s/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8000/api/${dataType}s/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       console.log(`Registro con ID ${id} eliminado`);
-      
-      // Actualizar la lista de datos después de la eliminación
-      const updatedData = data.filter(item => item.id !== id);
-      updateData(updatedData);
-      
+
+      // Actualiza el estado de los datos después de eliminar
+      setData(data.filter((item) => item.id !== id));
     } catch (error) {
       console.error("Error al eliminar el registro:", error);
     }
@@ -77,7 +89,15 @@ export const TableCustom = ({ data: initialData, columns, dataType}) => {
                         </Button>
                       </Group>
                     )}
-                    {column.key !== "actions" && item[column.key]}
+                    {column.key === "status" &&
+                      (item[column.key] === 0
+                        ? <Badge variant="light" color="gray" radius="md">Pendiente</Badge>
+                        : item[column.key] === 1
+                        ? <Badge variant="light" color="green" radius="md">Aprobado</Badge>
+                        : item[column.key] === 2
+                        ? <Badge variant="light" color="red" radius="md">Rechazado</Badge>
+                        : "Desconocido")} {/* Maneja los valores de estado */}
+                    {column.key !== "actions" && column.key !== "status" && item[column.key]}
                   </Table.Td>
                 ))}
               </Table.Tr>
@@ -91,8 +111,8 @@ export const TableCustom = ({ data: initialData, columns, dataType}) => {
         <Modal
           h={300}
           centered
-          opened={openedModal}
-          onClose={() => close()} // Cerrar el modal al hacer clic en cerrar
+          opened={openedModalEdit}
+          onClose={closeModal} // Cerrar el modal al hacer clic en cerrar
           title={`Editar ${dataType}`} // Usar dataType para el título dinámico
           size="xl"
         >
@@ -100,24 +120,22 @@ export const TableCustom = ({ data: initialData, columns, dataType}) => {
             <RiskForm
               initialValues={selectedItem}
               editMode={true}
-              updateData={updateData} // Pasar función de actualización
-              close={close} // Pasar función de cierre del modal
+              close={closeModal} // Pasar función de cierre del modal
             />
           )}
           {dataType === "control" && (
             <ControlForm
               initialValues={selectedItem}
               editMode={true}
-              updateData={updateData} // Pasar función de actualización
-              close={close} // Pasar función de cierre del modal
+              opened={openedModalEdit}
+              close={closeModal} // Pasar función de cierre del modal
             />
           )}
           {dataType === "process" && (
             <ProcessForm
               initialValues={selectedItem}
               editMode={true}
-              updateData={updateData} // Pasar función de actualización
-              close={close} // Pasar función de cierre del modal
+              close={closeModal} // Pasar función de cierre del modal
             />
           )}
           {/* Agrega más condiciones para otros tipos de datos si es necesario */}

@@ -81,7 +81,7 @@ INSTALLED_APPS = [
     'allauth.account',
 	# allauth social accounts
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
+        # 'allauth.socialaccount.providers.google',
     # local app
     "users",
     "api",
@@ -104,6 +104,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     # cors header middleware
     "corsheaders.middleware.CorsMiddleware",
+    
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -184,7 +185,7 @@ MEDIA_URL = 'media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'dist/static')
+    os.path.join(BASE_DIR, 'dist\static')
 ]
 
 # Default primary key field type
@@ -251,6 +252,8 @@ REST_FRAMEWORK = {
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     )
 }
+
+REST_USE_JWT = True
 
 # rest auth
 REST_AUTH = {

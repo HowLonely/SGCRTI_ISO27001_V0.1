@@ -3,6 +3,7 @@ from . import views
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import email_confirmation, reset_password_confirm
+from dj_rest_auth.registration.views import ConfirmEmailView
 
 urlpatterns = [
     # path('register/', views.register),
@@ -14,6 +15,7 @@ urlpatterns = [
     # path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
     # path('dj-rest-auth/registration/account-confirm-email/<str:key>/', email_confirmation),
     # path('reset/password/confirm/<int:uid>/<str:token>', reset_password_confirm, name="password_reset_confirm"),
+
 ]
 
 

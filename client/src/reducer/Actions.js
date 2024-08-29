@@ -2,6 +2,8 @@ import TYPE from "./Type";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
+import Cookies from "js-cookie"
+
 
 export const closeAlert = () => (dispatch) => {
   dispatch({
@@ -16,6 +18,7 @@ export const loginAction = (email, password) => async (dispatch) => {
       "Content-Type": "application/json",
     },
   };
+
   const body = JSON.stringify({ email, password });
   try {
     const res = await axios.post(
@@ -31,18 +34,21 @@ export const loginAction = (email, password) => async (dispatch) => {
     dispatch({
       type: TYPE.LOGIN_FAIL,
     });
+    throw err;  // Lanzamos el error para que pueda ser capturado en el componente
   }
 };
 
 export const verify = () => async (dispatch) => {
-  if (localStorage.getItem("access_token")) {
+  console.log("verify actions")
+
+  if (Cookies.get("access")) {
     const config = {
       headers: {
         "Content-Type": "application/json",
       },
     };
     const body = JSON.stringify({
-      token: localStorage.getItem("access_token"),
+      token: Cookies.get("access"),
     });
     try {
       await axios.post(
@@ -69,11 +75,11 @@ export const verify = () => async (dispatch) => {
 export const getUser = () => async (dispatch) => {
   console.log("Action getUser");
 
-  if (localStorage.getItem("access_token")) {
+  if (Cookies.get("access")) {
     const config = {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        Authorization: `Bearer ${Cookies.get("access")}`,
       },
     };
     try {
@@ -99,7 +105,8 @@ export const getUser = () => async (dispatch) => {
 
 export const refresh = () => async (dispatch) => {
   console.log("refresh Action")
-  if (localStorage.getItem("access_token")) {
+
+  if (Cookies.get("access")) {
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -134,7 +141,7 @@ export const changePassword =
     const config = {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        Authorization: `Bearer ${Cookies.get("access")}`,
       },
     };
     const body = JSON.stringify({ new_password1, new_password2, old_password });
@@ -183,6 +190,7 @@ export const signup =
         "Content-Type": "application/json",
       },
     };
+
     const body = JSON.stringify({
       email,
       first_name,
@@ -285,7 +293,7 @@ export const resetPasswordConfirm =
   };
 
 export const googleLogin = (code) => async (dispatch) => {
-  if (!localStorage.getItem("access_token")) {
+  if (!Cookies.get("access")) {
     const config = {
       headers: {
         "Content-Type": "application/json",

@@ -1,17 +1,21 @@
-import { Button, Group, Modal, Stack } from "@mantine/core";
+import { Button, Group, Loader, Modal, Stack } from "@mantine/core";
 
 import { TableCustom } from "../../components/Tables/TableCustom";
 
 import { useFetch } from "../../hooks/useFetch";
-import { RiskForm } from "../../components/ModalForms/RiskForm";
+import { RiskForm } from "../../components/ModalForms/Riesgos/RiskForm";
 import {
-  RiskModalContext,
   useModal,
-} from "../../components/ModalForms/RiskModalContext";
+} from "../../components/ModalForms/ModalContext";
 
-export const Riesgos = () => {
-  const { openedModal, openModal, closeModal } = useModal(); // Usar el hook de contexto
-  //console.log(risks);
+import { ModalProvider } from "../../components/ModalForms/ModalContext";
+
+
+const Riesgos = () => {
+  const { openedModal, openModal, closeModal } = useModal();
+
+  console.log("openedmodal: ", openedModal);
+
 
   // Fetchear datos
   const fetchRisk = useFetch("http://localhost:8000/api/risks/");
@@ -23,10 +27,21 @@ export const Riesgos = () => {
     { key: "name", title: "Nombre" },
     { key: "probability", title: "Probabilidad" },
     { key: "impact", title: "Impacto" },
+    { key: "inherent_risk", title: "Riesgo inherente" },
+    { key: "residual_risk", title: "Riesgo residual" },
     { key: "actions", title: "" },
   ];
 
+
   const risks_data = fetchRisk.data;
+
+  if (fetchRisk.isLoading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "50px" }}>
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <Stack>
@@ -35,7 +50,7 @@ export const Riesgos = () => {
         <Modal
           h={300}
           opened={openedModal}
-          onClose={closeModal()}
+          onClose={closeModal}
           title="Crear riesgo"
           size={"xl"}
           centered
@@ -43,7 +58,9 @@ export const Riesgos = () => {
           <RiskForm />
         </Modal>
 
-        <Button onClick={openModal()} variant="outline" size="md" radius={"md"}>
+        <Button 
+        onClick={openModal} 
+        variant="outline" size="md" radius={"md"}>
           Agregar riesgo
         </Button>
       </Group>
@@ -59,8 +76,10 @@ export const Riesgos = () => {
   );
 };
 
-export default () => (
-  <RiskModalContext>
+const WrappedRiesgos = () => (
+  <ModalProvider>
     <Riesgos />
-  </RiskModalContext>
+  </ModalProvider>
 );
+
+export default WrappedRiesgos;

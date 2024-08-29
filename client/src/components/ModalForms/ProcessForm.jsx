@@ -47,6 +47,7 @@ export const ProcessForm = ({ initialValues, editMode }) => {
     { key: "id", title: "Código" },
     { key: "name", title: "Nombre" },
     { key: "efficiency", title: "Eficacia" },
+    { key: "actions", title: "Acciones" }
   ];
 
   const risk_columns = [

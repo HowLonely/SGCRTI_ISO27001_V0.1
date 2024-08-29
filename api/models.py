@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
 # Create your models here.
 
 class Event(models.Model):
@@ -8,25 +9,6 @@ class Event(models.Model):
     details = models.TextField(blank=True, null=True)
     location = models.CharField(max_length=150)
     dateTime = models.DateTimeField()
-
-    def __str__(self):
-        return self.name
-
-class Risk(models.Model):
-    name = models.CharField(max_length=100)
-    probability = models.DecimalField(max_digits=5, decimal_places=2)
-    details = models.TextField(blank=True, null=True)
-    impact = models.DecimalField(max_digits=5, decimal_places=2)
-    events = models.ManyToManyField(Event, related_name="risks", blank=True, null=True)
-
-    def __str__(self):
-        return self.name
-    
-class Process(models.Model):
-    name = models.CharField(max_length=100)
-    details = models.TextField(blank=True, null=True)
-    events = models.ManyToManyField(Event, related_name="processes", blank=True, null=True)
-    risks = models.ManyToManyField(Risk, related_name="processes", blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -48,8 +30,8 @@ class Control(models.Model):
     execution = models.CharField(max_length=20)
     efficacy = models.DecimalField(max_digits=5, decimal_places=2, blank=True)
     details = models.TextField(blank=True, null=True)
-    risks = models.ManyToManyField(Risk, related_name="controls", blank=True, null=True)
-
+    status = models.IntegerField(max_length=1, null=True)
+    
     def __str__(self):
         return self.name
     
@@ -89,4 +71,76 @@ class Control(models.Model):
 
     def save(self, *args, **kwargs):
         self.calculate_efficacy()
+        self.status = 0
         super(Control, self).save(*args, **kwargs)
+
+class Risk(models.Model):
+    name = models.CharField(max_length=100)
+    probability = models.DecimalField(max_digits=5, decimal_places=2)
+    details = models.TextField(blank=True, null=True)
+    impact = models.DecimalField(max_digits=5, decimal_places=2)
+    residual_risk = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    inherent_risk = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    controls = models.ManyToManyField(Control, related_name="risks", blank=True)
+
+    def __str__(self):
+        return self.name
+    
+    def save(self, *args, **kwargs):
+        # Primero guardamos el objeto para que se cree en la base de datos.
+        super().save(*args, **kwargs)
+        
+        # Luego calculamos el riesgo inherente después del primer guardado.
+        self.inherent_risk = self.calcular_riesgo_inherente()
+        self.residual_risk = self.calcular_riesgo_residual()
+        super().save(update_fields=['inherent_risk'])
+        super().save(update_fields=['residual_risk'])
+
+
+    def calcular_riesgo_residual(self):
+        # Validación de probabilidad e impacto
+        if not (0 <= self.probability <= 1) or not (0 <= self.impact <= 1):
+            raise ValueError("Los valores de probabilidad e impacto deben estar entre 0 y 1")
+
+        # Calcular riesgo residual con base en el riesgo inherente y la eficacia de los controles
+        riesgo_inherente = self.calcular_riesgo_inherente()
+        eficacia_controles = self.calcular_eficacia_controles()
+
+        # Si no hay controles, el riesgo residual es igual al inherente
+        if eficacia_controles == 0:
+            return riesgo_inherente
+
+        return riesgo_inherente * (1 - eficacia_controles)
+
+    def calcular_riesgo_inherente(self):
+        return self.probability * self.impact
+
+    def calcular_eficacia_controles(self):
+        # Calcula la eficacia combinada de los controles asociados al riesgo
+        if self.pk:  # Verifica que el objeto Risk tenga un ID
+            controles = self.controls.all()  # Suponiendo que tienes una relación con el modelo Control
+            if controles.exists():
+                eficacia_total = 1
+                for control in controles:
+                    eficacia_total *= (1 - control.efficacy)
+                return 1 - eficacia_total
+        return 0
+
+@receiver(m2m_changed, sender=Risk.controls.through)
+def actualizar_riesgo_residual(sender, instance, action, **kwargs):
+    # Verifica si la instancia es del modelo `Risk`
+    if isinstance(instance, Risk):
+        # Solo recalcular el riesgo residual cuando se añaden controles
+        if action == 'post_add':
+            # Actualiza el riesgo residual después de asociar un nuevo control
+            instance.refresh_from_db()  # Asegúrate de tener la instancia más reciente
+            instance.residual_risk = instance.calcular_riesgo_residual()
+            instance.save(update_fields=['residual_risk'])
+class Process(models.Model):
+    name = models.CharField(max_length=100)
+    details = models.TextField(blank=True, null=True)
+    events = models.ManyToManyField(Event, related_name="processes", blank=True)
+    risks = models.ManyToManyField(Risk, related_name="processes", blank=True)
+
+    def __str__(self):
+        return self.name

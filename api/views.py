@@ -14,12 +14,24 @@ def control_list(req):
         return Response(serializer.data)
     
     if req.method == 'POST':
-        serializer = ControlSerializer(data = req.data)
+        risk_ids = req.data.get('risks')  # Obtenemos la lista de riesgos
+
+        if not isinstance(risk_ids, list) or not risk_ids:
+            return Response({"error": "ID de riesgo inválido o faltante."}, status=status.HTTP_400_BAD_REQUEST)
+
+        risks = Risk.objects.filter(id__in=risk_ids)  # Buscamos todos los riesgos que correspondan a los IDs
+
+        if len(risks) != len(risk_ids):  # Verificamos que todos los riesgos existan
+            return Response({"error": "Uno o más riesgos no se encontraron."}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = ControlSerializer(data=req.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data,status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-    
+            control = serializer.save()
+            control.risks.set(risk_ids)  # Asociamos los IDs de los riesgos al control
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['GET', 'PUT', 'DELETE'])
 def check_control(req, pk):
     try:

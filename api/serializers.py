@@ -10,12 +10,6 @@ class CustomSerializer(serializers.ModelSerializer):
         else:
             return expanded_fields
 
-class ControlSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Control
-        fields = '__all__'
-        extra_kwargs = {'risks': {'required': False}}
-
 class ProcessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Process
@@ -40,3 +34,12 @@ class AssetSerializer(CustomSerializer):
         model = Asset
         fields = '__all__'
         extra_kwargs = {'risk': {'required': False}}
+
+class ControlSerializer(serializers.ModelSerializer):
+    risks = serializers.PrimaryKeyRelatedField(read_only=True, many=True)  # Solo IDs, sin queryset
+    class Meta:
+        model = Control
+        fields = '__all__'
+        extra_kwargs = {
+            'risks': {'required': False},
+        }

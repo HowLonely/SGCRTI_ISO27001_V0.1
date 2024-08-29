@@ -1,24 +1,18 @@
 import { showNotification } from "@mantine/notifications";
 import TYPE from "./Type";
+import Cookies from "js-cookie"
 
 const initialState = {
-  access_token: localStorage.getItem("access_token"),
-  user: localStorage.getItem("user"),
-  message: "",
+  access_token: Cookies.get("access"),
+  message: null,
+  user: null,
+  isAuthenticated: false,
 };
 
 const AuthReducer = (state = initialState, action) => {
   const { type, payload } = action;
   switch (type) {
     case TYPE.LOGIN_SUCCESS:
-      localStorage.setItem("access_token", payload.access);
-      localStorage.setItem("user", payload.user)
-      showNotification({
-        title: "✅ HA INICIADO SESIÓN CORRECTAMENTE",
-        message: "",
-        color: "green",
-      });
-
       return {
         ...state,
         access_token: payload.access,
@@ -27,12 +21,7 @@ const AuthReducer = (state = initialState, action) => {
         message: "✅ Se ha logeado correctamente",
       };
     case TYPE.LOGIN_FAIL:
-      localStorage.removeItem("access_token");
-      showNotification({
-        title: "❌ ERROR AL INICIAR SESIÓN",
-        message: "",
-        color: "red",
-      });
+      Cookies.remove("access");
       return {
         ...state,
         access_token: null,
@@ -61,7 +50,7 @@ const AuthReducer = (state = initialState, action) => {
         user: null,
       };
     case TYPE.REFRESH_SUCCESS:
-      localStorage.setItem("access_token", payload.access);
+      Cookies.set("access", payload.access);
       return {
         ...state,
         access_token: payload.access,
@@ -69,7 +58,7 @@ const AuthReducer = (state = initialState, action) => {
         message: "Refresh token success",
       };
     case TYPE.REFRESH_FAIL:
-      localStorage.removeItem("access_token");
+      Cookies.remove("access");
       return {
         ...state,
         access_token: null,
@@ -149,7 +138,7 @@ const AuthReducer = (state = initialState, action) => {
         message: "Set new password failed",
       };
     case TYPE.LOGOUT:
-      localStorage.removeItem("access_token");
+      Cookies.remove("access");
       return {
         ...state,
         access_token: null,

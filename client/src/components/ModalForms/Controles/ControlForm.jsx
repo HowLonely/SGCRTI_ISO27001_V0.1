@@ -11,122 +11,83 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { useFetch } from "../../hooks/useFetch";
+import { useFetch } from "../../../hooks/useFetch";
 import { IconSubtask } from "@tabler/icons-react";
-import { TableAsociation } from "../../components/Tables/TableAsociation";
+import { TableAsociation } from "../../Tables/TableAsociation";
+import { useModal } from "../ModalContext";
 
-export const ControlForm = ({ initialValues, editMode }) => {
+export const ControlForm = ({ initialValues = {}, editMode = false }) => {
   const [active, setActive] = useState(0);
-
   const [selectedRiskIds, setSelectedRiskIds] = useState([]);
+
+  const { handleFormSubmitSuccess } = useModal(); // Extraer el manejador del contexto
 
   console.log("Controlform: ", initialValues);
 
   useEffect(() => {
-    // Selecciona automáticamente los procesos y controles del riesgo inicial
-    if (initialValues && initialValues.risks) {
+    console.log("initial values risks: " + initialValues.risks)
+    if (initialValues.risks) {
       setSelectedRiskIds(initialValues.risks);
     }
   }, [initialValues]);
 
   const fetchRisk = useFetch("http://localhost:8000/api/risks/");
 
-  const risk_columns = [
-    { key: "id", title: "Código" },
-    { key: "name", title: "Nombre" },
-    { key: "probability", title: "Probabilidad" },
-    { key: "impact", title: "Impacto" },
-  ];
+  const form = useForm({
+    initialValues: initialValues || {
+      name: initialValues.name || "",
+      type: initialValues.type || "",
+      frequency: initialValues.frequency || "",
+      flexibility: initialValues.flexibility || "",
+      execution: initialValues.execution || "",
+      details: initialValues.details || "",
+    },
 
-  const risk_data = fetchRisk.data;
+    validate: (values) => {
+      const errors = {};
+      if (active === 0) {
+        if (!values.name) errors.name = "Ingrese nombre";
+        if (!values.type) errors.type = "Ingrese tipo";
+        if (!values.frequency) errors.frequency = "Ingrese frecuencia";
+        if (!values.flexibility) errors.flexibility = "Ingrese flexibilidad";
+        if (!values.execution) errors.execution = "Ingrese ejecución";
 
-  // METODO POST DEL FORMULARIO
+        return errors;
+      }
+    },
+  });
+
   const handleSubmit = async (data) => {
     const requestData = {
       ...data,
       risks: selectedRiskIds,
     };
 
-    if (editMode) {
-      // Lógica para actualizar un control existente (PUT)
-      console.log("Actualizar control:", requestData);
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/controls/${initialValues.id}`,
-          {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-          }
-        );
-        const resp = await response.json();
-        console.log(resp);
-      } catch (error) {
-        console.error("Error al actualizar el control:", error);
-      }
-    } else {
-      // Lógica para crear un nuevo control (POST)
-      console.log("Crear nuevo control:", requestData);
-      try {
-        const response = await fetch("http://localhost:8000/api/controls/", {
-          method: "POST",
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/controls/${
+          editMode ? initialValues.id : ""
+        }`,
+        {
+          method: editMode ? "PUT" : "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestData),
-        });
-        const resp = await response.json();
-        console.log(resp);
-      } catch (error) {
-        console.error("Error al crear el nuevo control:", error);
-      }
-    }
+        }
+      );
 
-    close()
-    console.log("close")
+      if (!response.ok) throw new Error("Error en la solicitud");
+
+      // Si el registro o edición fue exitoso
+      handleFormSubmitSuccess(); // <-- Llamada para cerrar el modal
+    } catch (error) {
+      console.error("Error al procesar:", error);
+    }
   };
 
-  const form = useForm({
-    initialValues: initialValues || {
-      name: "",
-      type: "",
-      frequency: "",
-      flexibility: "",
-      execution: "",
-      details: "",
-    },
-
-    validate: (values) => {
-      if (active === 0) {
-        return {
-          name: values.name ? null : "Ingrese un nombre del control",
-          type: values.type ? null : "Ingrese un tipo al control",
-          frequency: values.frequency
-            ? null
-            : "Ingrese la frecuencia del control",
-          flexibility: values.flexibility
-            ? null
-            : "Ingrese la flexibilidad del control",
-          execution: values.execution
-            ? null
-            : "Ingrese la ejecución del control",
-        };
-      }
-
-      return {};
-    },
-  });
-
   const nextStep = () =>
-    setActive((current) => {
-      if (form.validate().hasErrors) {
-        return current;
-      }
-      return current < 2 ? current + 1 : current;
-    });
-
+    setActive((current) => (form.validate().hasErrors ? current : current + 1));
   const prevStep = () =>
     setActive((current) => (current > 0 ? current - 1 : current));
 
@@ -146,7 +107,7 @@ export const ControlForm = ({ initialValues, editMode }) => {
               required
               radius="md"
               size="md"
-              label="Nombre del Control"
+              label="Nombre"
               placeholder="Control 1"
               description="Ingrese un nombre para el control"
               inputWrapperOrder={["label", "description", "input", "error"]}
@@ -157,8 +118,8 @@ export const ControlForm = ({ initialValues, editMode }) => {
                 required
                 radius="md"
                 size="md"
-                label="Tipo de Control"
-                placeholder="Seleccione el tipo de control"
+                label="Tipo"
+                placeholder="Seleccionar"
                 description="Clasifique el control si es correctivo, detectivo o preventivo"
                 data={[
                   { value: "correctivo", label: "Correctivo" },
@@ -257,8 +218,12 @@ export const ControlForm = ({ initialValues, editMode }) => {
                   </Group>
                   {!fetchRisk.isLoading && (
                     <TableAsociation
-                      data={risk_data}
-                      columns={risk_columns}
+                      data={fetchRisk.data}
+                      columns={[
+                        { key: "name", title: "Nombre" },
+                        { key: "probability", title: "Probabilidad" },
+                        { key: "impact", title: "Impacto" },
+                      ]}
                       selectedIds={selectedRiskIds}
                       setSelectedIds={setSelectedRiskIds}
                     />

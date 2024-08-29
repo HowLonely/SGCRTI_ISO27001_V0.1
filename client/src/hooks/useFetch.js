@@ -35,6 +35,7 @@ export const useFetch = (url, method = 'GET', body = null) => {
     fetchData();
 
   }, [url, method, body]);
+  
 
   return { data, isLoading, error };
 };
